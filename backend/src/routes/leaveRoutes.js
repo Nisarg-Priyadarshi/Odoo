@@ -14,6 +14,7 @@ router.get('/me', requireAuth, leaveValidation.leaveQueryValidation, handleValid
 router.get('/', requireAuth, requireAdmin, leaveValidation.leaveQueryValidation, handleValidationErrors, leaveController.getAllLeaveRequests);
 router.put('/:id/approve', requireAuth, requireAdmin, leaveValidation.approveLeaveValidation, handleValidationErrors, leaveController.approveLeaveRequest);
 router.put('/:id/reject', requireAuth, requireAdmin, leaveValidation.rejectLeaveValidation, handleValidationErrors, leaveController.rejectLeaveRequest);
+router.put('/:id/status', requireAuth, requireAdmin, leaveValidation.updateLeaveStatusValidation, handleValidationErrors, leaveController.updateLeaveStatus);
 
 export default router;
 

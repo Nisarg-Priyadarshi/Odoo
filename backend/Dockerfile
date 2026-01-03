@@ -1,9 +1,6 @@
-FROM node:20-alpine
+FROM node:20-bullseye
 
 WORKDIR /app
-
-# Install Prisma CLI globally for migrations
-RUN npm install -g prisma
 
 # Copy package files
 COPY package*.json ./
@@ -14,14 +11,18 @@ RUN npm install
 # Copy application code (but exclude node_modules)
 COPY . .
 
-# Generate Prisma Client after copying code
-RUN npx prisma generate
+# Clean install and regenerate Prisma client
+RUN rm -rf node_modules package-lock.json \
+  && npm install \
+  && npx prisma generate
 
 # Expose port
 EXPOSE 5000
 
-# Install netcat and OpenSSL compatibility for Prisma
-RUN apk add --no-cache netcat-openbsd openssl-dev
+# Install netcat for wait script
+RUN apt-get update \
+  && apt-get install -y --no-install-recommends netcat-openbsd \
+  && rm -rf /var/lib/apt/lists/*
 
 # Start the application with wait script
 CMD ["sh", "-c", "echo 'Waiting for database...' && until nc -z postgres 5432; do echo 'Waiting for postgres...'; sleep 2; done && echo 'Database is ready!' && npm run dev"]

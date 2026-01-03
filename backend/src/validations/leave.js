@@ -41,6 +41,22 @@ export const approveLeaveValidation = [
     .withMessage('Admin comment must not exceed 500 characters'),
 ];
 
+export const updateLeaveStatusValidation = [
+  param('id')
+    .isUUID()
+    .withMessage('Invalid leave request ID format'),
+
+  body('status')
+    .isIn(['PENDING', 'APPROVED', 'REJECTED', 'CANCELLED'])
+    .withMessage('Status must be PENDING, APPROVED, REJECTED, or CANCELLED'),
+
+  body('adminComment')
+    .optional()
+    .trim()
+    .isLength({ max: 500 })
+    .withMessage('Admin comment must not exceed 500 characters'),
+];
+
 export const rejectLeaveValidation = [
   param('id')
     .isUUID()

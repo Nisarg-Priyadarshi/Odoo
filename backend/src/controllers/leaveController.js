@@ -13,6 +13,46 @@ export const createLeaveRequest = async (req, res, next) => {
   }
 };
 
+export const updateLeaveStatus = async (req, res, next) => {
+  try {
+    const { status, adminComment } = req.body;
+    console.log('🔍 updateLeaveStatus received:', { id: req.params.id, status, adminComment });
+
+    let leaveRequest;
+
+    if (status === 'APPROVED') {
+      leaveRequest = await leaveService.approveLeaveRequest(
+        req.params.id,
+        req.user.id,
+        adminComment,
+        req
+      );
+    } else if (status === 'REJECTED') {
+      leaveRequest = await leaveService.rejectLeaveRequest(
+        req.params.id,
+        req.user.id,
+        adminComment,
+        req
+      );
+    } else {
+      const error = new Error('Unsupported status update for this endpoint');
+      error.statusCode = 400;
+      throw error;
+    }
+
+    console.log('✅ updateLeaveStatus result:', { id: leaveRequest.id, status: leaveRequest.status });
+
+    res.status(200).json({
+      success: true,
+      message: `Leave request ${status.toLowerCase()} successfully`,
+      data: leaveRequest,
+    });
+  } catch (error) {
+    console.error('❌ updateLeaveStatus error:', error);
+    next(error);
+  }
+};
+
 export const getMyLeaveRequests = async (req, res, next) => {
   try {
     const leaveRequests = await leaveService.getMyLeaveRequests(req.user.id, req.query);

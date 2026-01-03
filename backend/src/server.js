@@ -6,6 +6,7 @@ import rateLimit from 'express-rate-limit';
 import { config } from './config/env.js';
 import { errorHandler } from './middlewares/errorHandler.js';
 import { notFound } from './middlewares/notFound.js';
+import prisma from './config/database.js';
 
 // Routes
 import authRoutes from './routes/authRoutes.js';
@@ -70,14 +71,28 @@ app.use(notFound);
 // Error handler
 app.use(errorHandler);
 
-// Start server
+// Start server with DB connection check
 const PORT = config.port;
 
-app.listen(PORT, () => {
-  console.log(`🚀 Server running on port ${PORT}`);
-  console.log(`📝 Environment: ${config.nodeEnv}`);
-  console.log(`🔗 API Base URL: http://localhost:${PORT}/api`);
-});
+const startServer = async () => {
+  try {
+    await prisma.$connect();
+    console.log('✅ Database connected successfully');
+    console.log('✅ Database connection established successfully');
+    console.log(`🔌 DATABASE_URL: ${config.database.url}`);
+
+    app.listen(PORT, () => {
+      console.log(`🚀 Server running on port ${PORT}`);
+      console.log(`📝 Environment: ${config.nodeEnv}`);
+      console.log(`🔗 API Base URL: http://localhost:${PORT}/api`);
+    });
+  } catch (error) {
+    console.error('❌ Failed to connect to the database on startup:', error);
+    process.exit(1);
+  }
+};
+
+startServer();
 
 export default app;
 
